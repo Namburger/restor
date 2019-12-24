@@ -22,7 +22,8 @@ using std::to_string;
 namespace restor {
 
 DetectionServer::DetectionServer(
-    const string& model_path, const string& label_path, const int num_results, const string& port)
+    const string& model_path, const string& label_path, const size_t num_results,
+    const string& port, size_t num_threads)
     : m_detection_engine(model_path),
       m_labels(coral::ReadLabelFile(label_path)),
       m_num_results(num_results),
@@ -31,6 +32,7 @@ DetectionServer::DetectionServer(
   LOG(INFO) << "model: " << model_path << "\n";
   LOG(INFO) << "label: " << label_path << "\n";
   LOG(INFO) << "num_results: " << m_num_results << "\n";
+  LOG(INFO) << "num_threads: " << num_threads << "\n";
   LOG(INFO) << "input_tensor_shape: " << input_tensor_shape_str();
 
   m_mux.handle("version").get(
@@ -40,7 +42,7 @@ DetectionServer::DetectionServer(
 
   m_server.reset(new served::net::server("0.0.0.0", port, m_mux));
   LOG(INFO) << "Serving on port: " << port << "\n";
-  m_server->run(10);
+  m_server->run(num_threads);
 }
 
 void DetectionServer::handle_detection(response& res, const request& req) {

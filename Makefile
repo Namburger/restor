@@ -31,9 +31,7 @@ BAZEL_BUILD_FLAGS := --crosstool_top=@crosstool//:toolchains \
                      --cpu=$(CPU) \
                      --sandbox_debug \
                      --linkopt=-L$(MAKEFILE_DIR)/libedgetpu/direct/$(CPU) \
-                     --linkopt=-L$(MAKEFILE_DIR)/thirdparty/all/yaml-cpp/lib \
-                     --linkopt=-l:libedgetpu.so.1 \
-            		     --linkopt=-l:libyaml-cpp.a
+                     --linkopt=-l:libedgetpu.so.1
 
 OUT_DIR := $(MAKEFILE_DIR)/out/$(CPU)
 
