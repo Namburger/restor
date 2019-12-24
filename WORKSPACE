@@ -44,6 +44,59 @@ glog_library(with_gflags=0)
 """,
 )
 
+TENSORFLOW_COMMIT = "5d0b55dd4a00c74809e5b32217070a26ac6ef823"
+# One way to find this SHA256 number is to download the corresponding tar.gz file
+# and then run `sha256sum` on local machine.
+TENSORFLOW_SHA256 = "2602e177164e7152bd8c7a9a1cab71898ec84ae707ca442cafbd966abdbb07b7"
+
+http_archive(
+    name = "org_tensorflow",
+    sha256 = TENSORFLOW_SHA256,
+    strip_prefix = "tensorflow-" + TENSORFLOW_COMMIT,
+    urls = [
+        "https://github.com/tensorflow/tensorflow/archive/" + TENSORFLOW_COMMIT + ".tar.gz",
+    ],
+)
+
+load("@org_tensorflow//tensorflow:workspace.bzl", "tf_workspace")
+tf_workspace(tf_repo_name = "org_tensorflow")
+
+http_archive(
+  name = "com_github_google_benchmark",
+  sha256 = "59f918c8ccd4d74b6ac43484467b500f1d64b40cc1010daa055375b322a43ba3",
+  strip_prefix = "benchmark-16703ff83c1ae6d53e5155df3bb3ab0bc96083be",
+  urls = [
+    "https://github.com/google/benchmark/archive/16703ff83c1ae6d53e5155df3bb3ab0bc96083be.zip"
+  ],
+)
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+http_archive(
+    name = "com_github_jupp0r_prometheus_cpp",
+    strip_prefix = "prometheus-cpp-master",
+    urls = ["https://github.com/jupp0r/prometheus-cpp/archive/master.zip"],
+)
+
+load("@com_github_jupp0r_prometheus_cpp//bazel:repositories.bzl", "prometheus_cpp_repositories")
+prometheus_cpp_repositories()
+
+new_local_repository(
+    name = "libedgetpu",
+    path = "libedgetpu",
+    build_file = "libedgetpu/BUILD"
+)
+
+http_archive(
+    name = "coral_crosstool",
+    sha256 = "cb31b1417ccdcf7dd9fca5ec63e1571672372c30427730255997a547569d2feb",
+    strip_prefix = "crosstool-9e00d5be43bf001f883b5700f5d04882fea00229",
+    urls = [
+        "https://github.com/google-coral/crosstool/archive/9e00d5be43bf001f883b5700f5d04882fea00229.tar.gz",
+    ],
+)
+load("@coral_crosstool//:configure.bzl", "cc_crosstool")
+cc_crosstool(name = "crosstool")
+
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 git_repository(
@@ -72,45 +125,4 @@ git_repository(
     commit = "62ff351432ebde809585bc2e48305bd5349e4b84",
 )
 
-TENSORFLOW_COMMIT = "5d0b55dd4a00c74809e5b32217070a26ac6ef823"
-# One way to find this SHA256 number is to download the corresponding tar.gz file
-# and then run `sha256sum` on local machine.
-TENSORFLOW_SHA256 = "2602e177164e7152bd8c7a9a1cab71898ec84ae707ca442cafbd966abdbb07b7"
 
-http_archive(
-    name = "org_tensorflow",
-    sha256 = TENSORFLOW_SHA256,
-    strip_prefix = "tensorflow-" + TENSORFLOW_COMMIT,
-    urls = [
-        "https://github.com/tensorflow/tensorflow/archive/" + TENSORFLOW_COMMIT + ".tar.gz",
-    ],
-)
-
-load("@org_tensorflow//tensorflow:workspace.bzl", "tf_workspace")
-tf_workspace(tf_repo_name = "org_tensorflow")
-
-http_archive(
-  name = "com_github_google_benchmark",
-  sha256 = "59f918c8ccd4d74b6ac43484467b500f1d64b40cc1010daa055375b322a43ba3",
-  strip_prefix = "benchmark-16703ff83c1ae6d53e5155df3bb3ab0bc96083be",
-  urls = [
-    "https://github.com/google/benchmark/archive/16703ff83c1ae6d53e5155df3bb3ab0bc96083be.zip"
-  ],
-)
-
-new_local_repository(
-    name = "libedgetpu",
-    path = "libedgetpu",
-    build_file = "libedgetpu/BUILD"
-)
-
-http_archive(
-    name = "coral_crosstool",
-    sha256 = "cb31b1417ccdcf7dd9fca5ec63e1571672372c30427730255997a547569d2feb",
-    strip_prefix = "crosstool-9e00d5be43bf001f883b5700f5d04882fea00229",
-    urls = [
-        "https://github.com/google-coral/crosstool/archive/9e00d5be43bf001f883b5700f5d04882fea00229.tar.gz",
-    ],
-)
-load("@coral_crosstool//:configure.bzl", "cc_crosstool")
-cc_crosstool(name = "crosstool")
