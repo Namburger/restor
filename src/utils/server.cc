@@ -8,6 +8,7 @@
 #include "src/detection/engine.h"
 #include "src/utils/image_utils.h"
 #include "src/utils/label_utils.h"
+#include "src/utils/prometheus.h"
 #include "src/utils/version.h"
 #include "tensorflow/lite/interpreter.h"
 #include "tensorflow/lite/model.h"
@@ -36,9 +37,12 @@ DetectionServer::DetectionServer(
   LOG(INFO) << "input_tensor_shape: " << input_tensor_shape_str();
 
   m_mux.handle("version").get(
-      [this](response& res, const request& req) { handle_get_runtime_version(res, req); });
+      [this](response& res, const request&) { handle_get_runtime_version(res); });
   m_mux.handle("detects").post(
       [this](response& res, const request& req) { handle_detection(res, req); });
+  m_mux.handle("metrics").get([this](response& res, const request&) {
+    res << restor::Registry::get_registry().to_string();
+  });
 
   m_server.reset(new served::net::server("0.0.0.0", port, m_mux));
   LOG(INFO) << "Serving on port: " << port << "\n";
@@ -69,7 +73,7 @@ void DetectionServer::handle_detection(response& res, const request& req) {
   res << j.dump();
 }
 
-void DetectionServer::handle_get_runtime_version(response& res, const request& req) {
+void DetectionServer::handle_get_runtime_version(response& res) {
   m_req_id++;
   if (m_version_json.empty()) {
     const auto& version = coral::GetRuntimeVersion();

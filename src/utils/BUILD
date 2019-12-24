@@ -177,6 +177,16 @@ cc_library(
 )
 
 cc_library(
+    name = "prometheus",
+    hdrs = ["prometheus.h"],
+    srcs = ["prometheus.cc"],
+    deps = [
+      "@com_github_jupp0r_prometheus_cpp//core",
+      "@com_github_jupp0r_prometheus_cpp//pull",
+    ],
+)
+
+cc_library(
     name = "detection_server",
     srcs = ["server.cc"],
     hdrs = ["server.h"],
@@ -189,5 +199,6 @@ cc_library(
       "//thirdparty:json",
       "//src/utils:image_utils",
       "//src/utils:label_utils",
+      "//src/utils:prometheus",
     ],
 )
