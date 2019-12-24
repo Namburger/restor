@@ -29,9 +29,11 @@ Default build will be for k8.
 
 Find the output binary file inside the out directory.
 
-## Example run
+## Example run (please run these examples from root dir)
 
-After installing all third party library finish building the binary, running the server is as easy as:
+After installing all third party libraries and finish building the binaries, don't forget to install [libedgetpu package](https://coral.ai/software/#debian-packages). Then:
+
+* Running the server is as easy as:
 
 ```
 $ ./out/k8/restor
@@ -46,7 +48,13 @@ I1223 22:54:56.403692 22708 server.cc:34] input_tensor_shape: [1,300,300,3]
 I1223 22:54:56.403978 22708 server.cc:42] Serving on port: 8888
 ```
 
-You can change the config/restor.json. One liner example to send a POST to the server:
+You can change the config/restor.json. 
+
+* One liner example to send a POST to the server as a client:
+
+<img width="200"
+     src="https://github.com/Namburger/restor/blob/master/test_data/grace_hopper.bmp" />
+<br><b>Figure 1.</b> grace_hopper.bmp
 
 ```
 $ echo "{\"detector\":\"please\", \"data\":\"`cat test_data/grace_hopper.bmp|base64 -w0`\"}" > /tmp/grace.json && curl -d@/tmp/grace.json -H "Content-Type: application/json" -X POST http://localhost:8888/detects | jq
@@ -79,3 +87,10 @@ I also use [jq](https://stedolan.github.io/jq/) to make the json string prettier
 * Huge thanks to all the opensource thirdparty libraries that I used for this project.
 * All models and test data came from [edgetpu](https://github.com/google-coral/edgetpu/tree/master/test_data)
 * The detector only support bmp images
+* Honorably mention [github.com/snowzach/doods](snowzach/doods) for the great project, this is an attempt of doing something similar in a different language just for the joy of programming :)
+
+
+## TODO
+
+* Right now server will fail if you just send garbage data to it, will fix that soon
+* Will extend this for users who don't have edgeTPU device, but it'll be slower inference
