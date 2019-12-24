@@ -10,8 +10,9 @@
 #include "nlohmann/json.hpp"
 #include "served/request_error.hpp"
 #include "src/utils/server.h"
+#include "yaml-cpp/yaml.h"
 
-ABSL_FLAG(std::string, config_path, "config/restor.json", "Path to the config.");
+ABSL_FLAG(std::string, config_path, "config/restor.yaml", "Path to the config.");
 ABSL_FLAG(
     std::string, model_path, "test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite",
     "full path to the models.");
@@ -36,26 +37,29 @@ int main(int argc, char* argv[]) {
   LOG(INFO) << "found " << available_tpus.size() << " TPU(s)\n";
 
   LOG(INFO) << "config: " << absl::GetFlag(FLAGS_config_path);
-  nlohmann::json conf;
+  // nlohmann::json conf;
+  YAML::Node yaml_node;
   if (!access(absl::GetFlag(FLAGS_config_path).c_str(), R_OK)) {
-    conf = nlohmann::json::parse(std::ifstream(absl::GetFlag(FLAGS_config_path)));
+    // conf = nlohmann::json::parse(std::ifstream(absl::GetFlag(FLAGS_config_path)));
+    yaml_node = YAML::LoadFile(absl::GetFlag(FLAGS_config_path));
   }
 
+  YAML::Node conf = yaml_node["restor"];
   // overwrite config with flags
   const auto& model_path = absl::GetFlag(FLAGS_model_path).empty()
-                               ? conf["modelFile"].get<std::string>()
+                               ? conf["modelFile"].as<std::string>()
                                : absl::GetFlag(FLAGS_model_path);
   const auto& labels_path = absl::GetFlag(FLAGS_label_path).empty()
-                                ? conf["labelFile"].get<std::string>()
+                                ? conf["labelFile"].as<std::string>()
                                 : absl::GetFlag(FLAGS_label_path);
-  auto num_results = (absl::GetFlag(FLAGS_num_results) != conf["numResults"].get<size_t>())
+  auto num_results = (absl::GetFlag(FLAGS_num_results) != conf["numResults"].as<size_t>())
                          ? absl::GetFlag(FLAGS_num_results)
-                         : conf["numResults"].get<size_t>();
-  auto num_threads = (absl::GetFlag(FLAGS_num_threads) != conf["numThreads"].get<size_t>())
+                         : conf["numResults"].as<size_t>();
+  auto num_threads = (absl::GetFlag(FLAGS_num_threads) != conf["numThreads"].as<size_t>())
                          ? absl::GetFlag(FLAGS_num_threads)
-                         : conf["numThreads"].get<size_t>();
+                         : conf["numThreads"].as<size_t>();
 
-  const auto& port = absl::GetFlag(FLAGS_port).empty() ? conf["port"].get<std::string>()
+  const auto& port = absl::GetFlag(FLAGS_port).empty() ? conf["port"].as<std::string>()
                                                        : absl::GetFlag(FLAGS_port);
 
   restor::DetectionServer s(model_path, labels_path, num_results, port, num_threads);
