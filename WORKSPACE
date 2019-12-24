@@ -66,6 +66,12 @@ git_repository(
 load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
 boost_deps()
 
+git_repository(
+    name = "com_jbeder_yaml_cpp",
+    remote = "https://github.com/jbeder/yaml-cpp.git",
+    commit = "62ff351432ebde809585bc2e48305bd5349e4b84",
+)
+
 TENSORFLOW_COMMIT = "5d0b55dd4a00c74809e5b32217070a26ac6ef823"
 # One way to find this SHA256 number is to download the corresponding tar.gz file
 # and then run `sha256sum` on local machine.
