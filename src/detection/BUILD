@@ -1,0 +1,38 @@
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+licenses(["notice"])  # Apache 2.0
+
+cc_library(
+    name = "engine",
+    srcs = [
+        "engine.cc",
+    ],
+    hdrs = [
+        "engine.h",
+    ],
+    deps = [
+        "//src/utils:bbox_utils",
+        "//src/basic:basic_engine",
+        "@com_google_glog//:glog",
+    ],
+)
+
+cc_test(
+    name = "engine_test",
+    srcs = [
+        "engine_test.cc",
+    ],
+    data = [
+        "//test_data:models",
+    ],
+    linkstatic = 1,
+    deps = [
+        ":engine",
+        "//src/utils:test_utils",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_glog//:glog",
+        "@com_google_googletest//:gtest",
+    ],
+)
