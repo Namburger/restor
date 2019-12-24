@@ -18,6 +18,7 @@ ABSL_FLAG(
 ABSL_FLAG(std::string, label_path, "test_data/coco_labels.txt", "full path to the label file.");
 ABSL_FLAG(std::string, port, "8888", "serving port");
 ABSL_FLAG(size_t, num_results, 5, "number of results to return");
+ABSL_FLAG(size_t, num_threads, 4, "number of threads to run server");
 
 int main(int argc, char* argv[]) {
   absl::ParseCommandLine(argc, argv);
@@ -50,10 +51,14 @@ int main(int argc, char* argv[]) {
   auto num_results = (absl::GetFlag(FLAGS_num_results) != conf["numResults"].get<size_t>())
                          ? absl::GetFlag(FLAGS_num_results)
                          : conf["numResults"].get<size_t>();
+  auto num_threads = (absl::GetFlag(FLAGS_num_threads) != conf["numThreads"].get<size_t>())
+                         ? absl::GetFlag(FLAGS_num_threads)
+                         : conf["numThreads"].get<size_t>();
+
   const auto& port = absl::GetFlag(FLAGS_port).empty() ? conf["port"].get<std::string>()
                                                        : absl::GetFlag(FLAGS_port);
 
-  restor::DetectionServer s(model_path, labels_path, num_results, port);
+  restor::DetectionServer s(model_path, labels_path, num_results, port, num_threads);
 
   return 0;
 }

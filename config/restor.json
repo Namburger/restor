@@ -2,5 +2,6 @@
   "modelFile": "test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite",
   "labelFile": "test_data/coco_labels.txt",
   "numResults": 5,
+  "numThreads": 4,
   "port": "8888"
 }
