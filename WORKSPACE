@@ -106,7 +106,7 @@ git_repository(
 )
 
 git_repository(
-  name = "com_meltwater_served",
+  name = "com_github_meltwater_served",
   remote = "https://github.com/meltwater/served.git",
   commit = "7e3f3509ec8c235ff8f68f1b022404fc1e4b977b",
 )

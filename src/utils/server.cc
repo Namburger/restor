@@ -2,6 +2,8 @@
 
 #include "glog/logging.h"
 #include "nlohmann/json.hpp"
+#include "prometheus/counter.h"
+#include "prometheus/registry.h"
 #include "served/request_error.hpp"
 #include "served/served.hpp"
 #include "served/status.hpp"
@@ -50,6 +52,12 @@ DetectionServer::DetectionServer(
 }
 
 void DetectionServer::handle_detection(response& res, const request& req) {
+  static auto& detection_counter = prometheus::BuildCounter()
+                                       .Name("server_detection_count")
+                                       .Help("Number of detections.")
+                                       .Register(restor::Registry::get_registry())
+                                       .Add({});
+  detection_counter.Increment();
   m_req_id++;
   auto body = json::parse(req.body());
   const auto& data = body["data"].get<string>();

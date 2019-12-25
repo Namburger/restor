@@ -8,7 +8,6 @@
 #include "edgetpu.h"
 #include "glog/logging.h"
 #include "nlohmann/json.hpp"
-#include "served/request_error.hpp"
 #include "src/utils/server.h"
 #include "yaml-cpp/yaml.h"
 
