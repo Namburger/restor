@@ -18,7 +18,6 @@ cc_binary(
         "@com_google_glog//:glog",
 	"@com_google_absl//absl/flags:flag",
 	"@com_google_absl//absl/flags:parse",
-	"@com_meltwater_served//:served",
 	"@com_jbeder_yaml_cpp//:yaml-cpp",
         "@org_tensorflow//tensorflow/lite:framework",
         "//thirdparty:json",
