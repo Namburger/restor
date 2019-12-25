@@ -93,6 +93,23 @@ $ echo "{\"detector\":\"please\", \"data\":\"`cat test_data/grace_hopper.bmp|bas
 
 I also use [jq](https://stedolan.github.io/jq/) to make the json string prettier, optionally you can just run the above command without `| jq` at the end if you don't have it installed.
 
+Explaination of the one liner:
+```
+$ # create the JSON file with BMP encoded data
+$  cat >/tmp/grace.json <<<EOF
+{"detector":"please", "data":" $(
+  cat test_data/grace_hopper.bmp |
+  base64 -w0
+)"}
+EOF
+$ # if no error, submit that JSON file
+$ curl -d@/tmp/grace.json \
+  -H "Content-Type: application/json" \
+  -X POST \
+  http://localhost:8888/detects | 
+jq
+```
+
 ## Notes
 
 * Huge thanks to [google-coral/lstpu](https://github.com/google-coral/tflite/tree/master/cpp/examples/lstpu) and [google-coral/edgetpu](https://github.com/google-coral/edgetpu) for the build system and the opensource API because otherwise I would have a very hard time coming up with it myself.
