@@ -1,6 +1,7 @@
 #include "src/utils/prometheus.h"
 
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include <limits>
 #include <string>
@@ -18,7 +19,7 @@ namespace restor {
 
 Registry::Registry()
     : m_fds(prometheus::BuildGauge()
-                .Name("open_fds")
+                .Name("process_open_fds")
                 .Help("Number of open file descriptors")
                 .Register(*this)
                 .Add({})) {}
@@ -33,11 +34,12 @@ vector<prometheus::MetricFamily> Registry::Collect() const {
 }
 
 void Registry::update_stats() {
+  // setting file desscriptors
+  auto max_fds = getdtablesize();
   int fd_counter{0};
   struct stat stats;
-  for (int i = 0; i < 1024; i++) {
-    fstat(i, &stats);
-    if (errno != EBADF) {
+  for (int i = 0; i < max_fds; i++) {
+    if (fstat(i, &stats); errno != EBADF) {
       fd_counter++;
     }
   }
