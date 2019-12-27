@@ -109,6 +109,28 @@ $ curl -d@/tmp/grace.json \
 jq
 ```
 
+## Metrics
+
+If you are interested in server metrics, they are available at the /metrics endpoint.
+
+An example prometheus.yaml config is provided in the config directory. You can easily setup a docker container by creating a Dockerfile with this content (also provided in the config directory):
+```
+FROM prom/prometheus
+ADD prometheus.yml /etc/prometheus/
+```
+
+Then run:
+```
+$ docker build -t prometheus . 
+$ docker run -p 9090:9090 prometheus 
+```
+
+You will then be able to query metrics by visiting localhost:9090/graph on your browser:
+
+<img width="777"
+     src="https://github.com/Namburger/restor/blob/master/test_data/metrics.png" />
+<br><b>Figure 2.</b> metrics.png
+
 ## Notes
 
 * Huge thanks to [google-coral/lstpu](https://github.com/google-coral/tflite/tree/master/cpp/examples/lstpu) and [google-coral/edgetpu](https://github.com/google-coral/edgetpu) for the build system and the opensource API because otherwise I would have a very hard time coming up with it myself.
