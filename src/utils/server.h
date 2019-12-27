@@ -1,4 +1,6 @@
 #include "nlohmann/json.hpp"
+#include "prometheus/counter.h"
+#include "prometheus/registry.h"
 #include "served/request_error.hpp"
 #include "served/served.hpp"
 #include "served/status.hpp"
@@ -16,6 +18,9 @@ public:
 
   void handle_detection(served::response& res, const served::request& req);
   void handle_get_runtime_version(served::response& res);
+  void handle_get_server_info(
+      served::response& res, const std::string& model, const std::string& label,
+      const size_t num_threads);
   std::string input_tensor_shape_str();
 
 private:
@@ -23,6 +28,8 @@ private:
   std::unordered_map<int, std::string> m_labels;
   size_t m_num_results;
   std::vector<int> m_input_tensor_shape;
+
+  prometheus::Family<prometheus::Counter>& m_requests_counter;
 
   served::multiplexer m_mux;
   std::shared_ptr<served::net::server> m_server;

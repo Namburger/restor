@@ -26,11 +26,15 @@ namespace restor {
 
 DetectionServer::DetectionServer(
     const string& model_path, const string& label_path, const size_t num_results,
-    const string& port, size_t num_threads)
+    const string& port, const size_t num_threads)
     : m_detection_engine(model_path),
       m_labels(coral::ReadLabelFile(label_path)),
       m_num_results(num_results),
-      m_input_tensor_shape(m_detection_engine.get_input_tensor_shape()) {
+      m_input_tensor_shape(m_detection_engine.get_input_tensor_shape()),
+      m_requests_counter(prometheus::BuildCounter()
+                             .Name("server_request_total")
+                             .Help("Number of total http requests handled")
+                             .Register(restor::Registry::get_registry())) {
   LOG(INFO) << "Engine initialized \n";
   LOG(INFO) << "model: " << model_path << "\n";
   LOG(INFO) << "label: " << label_path << "\n";
@@ -112,7 +116,9 @@ void DetectionServer::handle_detection(response& res, const request& req) {
 }
 
 void DetectionServer::handle_get_runtime_version(response& res) {
+  m_requests_counter.Add({{"method", "GET"}, {"service", "runtime_version"}}).Increment();
   m_req_id++;
+  res.set_header("Server", "Restor");
   if (m_version_json.empty()) {
     const auto& version = coral::GetRuntimeVersion();
     m_version_json["edgetpu"] = version.substr(version.find_last_of(",") + 2, version.size());
