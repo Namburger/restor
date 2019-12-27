@@ -36,7 +36,6 @@ int main(int argc, char* argv[]) {
 
   YAML::Node conf;
   if (!access(absl::GetFlag(FLAGS_config_path).c_str(), R_OK)) {
-    // conf = nlohmann::json::parse(std::ifstream(absl::GetFlag(FLAGS_config_path)));
     auto yaml_node = YAML::LoadFile(absl::GetFlag(FLAGS_config_path));
     conf = yaml_node["restor"];
   }

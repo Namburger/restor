@@ -43,34 +43,64 @@ DetectionServer::DetectionServer(
   m_mux.handle("detects").post(
       [this](response& res, const request& req) { handle_detection(res, req); });
   m_mux.handle("metrics").get([this](response& res, const request&) {
+    m_requests_counter.Add({{"method", "GET"}, {"service", "metrics"}}).Increment();
+    res.set_header("Server", "Restor");
     res << restor::Registry::get_registry().to_string();
   });
+  m_mux.handle("info").get([&, this](response& res, const request&) {
+    handle_get_server_info(res, model_path, label_path, num_threads);
+  });
 
+  LOG(INFO) << "End points registered";
   m_server.reset(new served::net::server("0.0.0.0", port, m_mux));
   LOG(INFO) << "Serving on port: " << port << "\n";
   m_server->run(num_threads);
 }
 
-void DetectionServer::handle_detection(response& res, const request& req) {
-  static auto& detection_counter = prometheus::BuildCounter()
-                                       .Name("server_detection_count")
-                                       .Help("Number of detections.")
-                                       .Register(restor::Registry::get_registry())
-                                       .Add({});
-  detection_counter.Increment();
+void DetectionServer::handle_get_server_info(
+    response& res, const string& model, const std::string& label, const size_t num_threads) {
+  m_requests_counter.Add({{"method", "GET"}, {"service", "server_info"}}).Increment();
   m_req_id++;
+  res.set_header("Server", "Restor");
+  json j;
+  j["model_path"] = model;
+  j["input_tensor_shape"] = input_tensor_shape_str();
+  j["label_path"] = label;
+  j["num_threads"] = num_threads;
+  j["num_results"] = m_num_results;
+  j["end_points"] = "GET/metrics, GET/info, GET/version, POST/detects";
+  LOG(INFO) << j.dump();
+  res << j.dump();
+}
+
+void DetectionServer::handle_detection(response& res, const request& req) {
+  m_requests_counter.Add({{"method", "POST"}, {"service", "detection"}}).Increment();
+  m_req_id++;
+  res.set_header("Server", "Restor");
   auto body = json::parse(req.body());
   const auto& data = body["data"].get<string>();
 
   std::vector<uint8_t> input_tensor = coral::addon::GetInputFromData(
       data, {m_input_tensor_shape[1], m_input_tensor_shape[2], m_input_tensor_shape[3]});
+  if (input_tensor.empty()) {
+    res.set_status(served::status_4XX::NOT_ACCEPTABLE);
+    json j;
+    j["req_id"] = m_req_id;
+    j["error"] = "Unable to process data";
+    j["message"] = "Please make sure data are uncorrupted base64 bmp format";
+    LOG(INFO) << j.dump();
+    res << j.dump();
+    return;
+  }
 
   auto results = m_detection_engine.DetectWithInputTensor(input_tensor);
   auto num_to_return = (results.size() < m_num_results) ? results.size() : m_num_results;
+
   json j;
   j["req_id"] = m_req_id;
+  if (!num_to_return) j["result"] = "None";
 
-  for (size_t i = 0; i < num_to_return; i++) {
+  for (auto i = 0; i < num_to_return; i++) {
     const auto& result = results.at(i);
     j["result" + to_string(i + 1)] = {{"candidate", m_labels[result.label]},
                                       {"score", result.score}};
