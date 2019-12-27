@@ -1,6 +1,6 @@
 # Restor
 
-Resttor is a punny REST API for Object Detection but this is not a good name because I might add classifycation functionality later.
+Restor is a punny REST API for Object Detection but this is not a good name because I might add classification functionality later.
 Machine Learning Inference for Object Detection on the Google's EdgeTPU Platform.
 You can send it non-garbage base64 encoded .bmp images, it can guess what objects are in that image and send you back a result as a json string.
 Please check the Notes section for some limitations as this project is still on it's early stage.
