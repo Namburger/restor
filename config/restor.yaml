@@ -3,4 +3,4 @@ restor:
   labelFile: test_data/coco_labels.txt
   numResults: 5
   numThreads: 4
-  port: 9090
+  port: 8888
