@@ -47,7 +47,7 @@ DetectionServer::DetectionServer(
   m_mux.handle("detects").post(
       [this](response& res, const request& req) { handle_detection(res, req); });
   m_mux.handle("metrics").get([this](response& res, const request&) {
-    m_requests_counter.Add({{"method", "GET"}, {"service", "metrics"}}).Increment();
+    m_requests_counter.Add({{"method", "GET"}, {"endpoint", "metrics"}}).Increment();
     res.set_header("Server", "Restor");
     res << restor::Registry::get_registry().to_string();
   });
@@ -63,7 +63,7 @@ DetectionServer::DetectionServer(
 
 void DetectionServer::handle_get_server_info(
     response& res, const string& model, const std::string& label, const size_t num_threads) {
-  m_requests_counter.Add({{"method", "GET"}, {"service", "server_info"}}).Increment();
+  m_requests_counter.Add({{"method", "GET"}, {"endpoint", "info"}}).Increment();
   m_req_id++;
   res.set_header("Server", "Restor");
   json j;
@@ -78,7 +78,7 @@ void DetectionServer::handle_get_server_info(
 }
 
 void DetectionServer::handle_detection(response& res, const request& req) {
-  m_requests_counter.Add({{"method", "POST"}, {"service", "detection"}}).Increment();
+  m_requests_counter.Add({{"method", "POST"}, {"endpoint", "detects"}}).Increment();
   m_req_id++;
   res.set_header("Server", "Restor");
   auto body = json::parse(req.body());
@@ -116,7 +116,7 @@ void DetectionServer::handle_detection(response& res, const request& req) {
 }
 
 void DetectionServer::handle_get_runtime_version(response& res) {
-  m_requests_counter.Add({{"method", "GET"}, {"service", "runtime_version"}}).Increment();
+  m_requests_counter.Add({{"method", "GET"}, {"endpoint", "version"}}).Increment();
   m_req_id++;
   res.set_header("Server", "Restor");
   if (m_version_json.empty()) {
