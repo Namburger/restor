@@ -1,22 +1,26 @@
 # Restor
 
-* What is it?
-
-A punny REST API for Object Detection but this is not a good name because I might add classifycation functionality later.
-
-* What does it do?
-
-Machine Learning Inference for Object Detection on the Google's EdgeTPU Platform. 
-
-* All the buzz words.
-
+Resttor is a punny REST API for Object Detection but this is not a good name because I might add classifycation functionality later.
+Machine Learning Inference for Object Detection on the Google's EdgeTPU Platform.
 You can send it non-garbage base64 encoded .bmp images, it can guess what objects are in that image and send you back a result as a json string.
+Please check the Notes section for some limitations as this project is still on it's early stage.
 
-Please check the Notes and the TODO sections for some limitations as this project is still on it's early stage.
+
+## API Endpoints
+| Method  | Endpoint  | Function                               | Requires                  |
+|:--------|:---------:|:--------------------------------------:|--------------------------:|
+| POST    | /detects  | Does Object Detection                  | json data of a .bmp image |
+| GET     | /version  | Exposes EdgeTPU Runtime Version        | None                      |
+| GET     | /info     | Exposes server's current configuration | None                      |
+| GET     | /metrics  | Exposes prometheus metrics             | None                      |
 
 ## Requirements
 
-Grab the Coral Dev Board or USB Accelerator or a PCIe Module from [coral.ai](https://coral.ai/products/) to get started.
+* Hardware
+  * Grab the Coral Dev Board or USB Accelerator or a PCIe Module from [coral.ai](https://coral.ai/products/) to get started.
+* Software
+  * 64bits x86-64 Debian based OS for the build (I develop this on Ubuntu 18.04 and Debian 10)
+  * Install [libedgetpu runtime](https://coral.ai/software/#debian-packages) where the code needs to be ran 
 
 ## Compile the project
 
@@ -51,7 +55,7 @@ After installing all third party libraries and finish building the binaries, don
 $ ./out/k8/restor
 I1223 22:54:52.376971 22708 main.cc:28] RESTOR
 I1223 22:54:52.390523 22708 main.cc:35] found 1 TPU(s)
-I1223 22:54:52.390568 22708 main.cc:37] config: config/restor.json
+I1223 22:54:52.390568 22708 main.cc:37] config: config/restor.yaml
 I1223 22:54:56.403568 22708 server.cc:30] Engine initialized 
 I1223 22:54:56.403604 22708 server.cc:31] model: test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite
 I1223 22:54:56.403623 22708 server.cc:32] label: test_data/coco_labels.txt
@@ -60,7 +64,7 @@ I1223 22:54:56.403692 22708 server.cc:34] input_tensor_shape: [1,300,300,3]
 I1223 22:54:56.403978 22708 server.cc:42] Serving on port: 8888
 ```
 
-You can change the config/restor.json. 
+You can change the config/restor.yaml to configure your model, ports, etc...
 
 * One liner example to send a POST to the server as a client:
 
@@ -69,7 +73,7 @@ You can change the config/restor.json.
 <br><b>Figure 1.</b> grace_hopper.bmp
 
 ```
-$ echo "{\"detector\":\"please\", \"data\":\"`cat test_data/grace_hopper.bmp|base64 -w0`\"}" > /tmp/grace.json && curl -d@/tmp/grace.json -H "Content-Type: application/json" -X POST http://localhost:8888/detects | jq
+$ echo "{\"data\":\"`cat test_data/grace_hopper.bmp|base64 -w0`\"}" > /tmp/grace.json && curl -d@/tmp/grace.json -H "Content-Type: application/json" -X POST http://localhost:9090/detects | jq
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100 1224k  100   161  100 1224k   2555  18.9M --:--:-- --:--:-- --:--:-- 18.9M
@@ -96,17 +100,12 @@ I also use [jq](https://stedolan.github.io/jq/) to make the json string prettier
 Explaination of the one liner:
 ```
 $ # create the JSON file with BMP encoded data
-$  cat >/tmp/grace.json <<<EOF
-{"detector":"please", "data":" $(
-  cat test_data/grace_hopper.bmp |
-  base64 -w0
-)"}
-EOF
+$ echo "{\"data\":\"`cat test_data/grace_hopper.bmp|base64 -w0`\"}" > /tmp/grace.json
 $ # if no error, submit that JSON file
 $ curl -d@/tmp/grace.json \
   -H "Content-Type: application/json" \
   -X POST \
-  http://localhost:8888/detects | 
+  http://localhost:9090/detects | 
 jq
 ```
 
@@ -116,10 +115,5 @@ jq
 * Huge thanks to all the opensource thirdparty libraries that I used for this project.
 * All models and test data came from [edgetpu](https://github.com/google-coral/edgetpu/tree/master/test_data)
 * The detector only support bmp images
-* Honorably mention [github.com/snowzach/doods](snowzach/doods) for the great project, this is an attempt of doing something similar in a different language just for the joy of programming :)
-
-
-## TODO
-
-* Right now server will fail if you just send garbage data to it, will fix that soon
-* Will extend this for users who don't have edgeTPU device, but it'll be slower inference
+* Honorably mention [snowzach/doods](github.com/snowzach/doods) for the great project, this is an attempt of doing something similar in a different language just for the joy of programming :)
+* Will most likely add on Classifycation Engine later

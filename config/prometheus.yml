@@ -1,0 +1,27 @@
+global:
+  scrape_interval:     10s
+  scrape_timeout:      10s
+  evaluation_interval: 10s
+
+scrape_configs:
+
+  # Scraping prometheus own instance
+  - job_name: 'prometheus'
+    static_configs:
+    - targets: ['localhost:9090']
+
+  # Example for scraping from your machine:
+  - job_name: 'local-restor'
+    honor_timestamps: true
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+    - targets: ['your-local-ip:8888']
+
+  # Example for scraping restor on the dev board
+  - job_name: 'devboard-restor'
+    honor_timestamps: true
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+    - targets: ['the-dev-board-ip:8888']
