@@ -32,16 +32,21 @@ Registry::Registry()
                 .Help("Number of open file descriptors")
                 .Register(*this)
                 .Add({})),
-      m_vmrss(prometheus::BuildGauge()
-                  .Name("process_resident_memory_bytes")
-                  .Help("Process resident memory size in bytes.")
-                  .Register(*this)
-                  .Add({})),
-      m_vmsize(prometheus::BuildGauge()
-                   .Name("process_virtual_memory_bytes")
-                   .Help("Process virtual memory size in bytes.")
+      m_vm_rss(prometheus::BuildGauge()
+                   .Name("process_resident_memory_bytes")
+                   .Help("Process resident memory size in bytes.")
                    .Register(*this)
-                   .Add({})) {}
+                   .Add({})),
+      m_vm_size(prometheus::BuildGauge()
+                    .Name("process_virtual_memory_bytes")
+                    .Help("Process virtual memory size in bytes.")
+                    .Register(*this)
+                    .Add({})),
+      m_vm_peak(prometheus::BuildGauge()
+                    .Name("process_virtual_memory_max_bytes")
+                    .Help("Process peak virtual memory size in bytes.")
+                    .Register(*this)
+                    .Add({})) {}
 
 Registry& Registry::get_registry() {
   static Registry r;
@@ -54,18 +59,16 @@ vector<prometheus::MetricFamily> Registry::Collect() const {
 
 void Registry::update_mem_usage() {
   // interested in VmRSS and VmSize
-  ifstream mem_status{"/proc/self/status"};
+  ifstream proc_status{"/proc/self/status"};
   string line;
-  while (mem_status.good()) {
-    getline(mem_status, line);
-    auto sub5 = line.substr(0, 5);
-    auto sub6 = line.substr(0, 6);
-    if (sub5 == "VmRSS") {
-      string num = regex_replace(line, regex(R"([\D])"), "");
-      m_vmrss.Set(stoul(num.c_str()) * 1024);
-    } else if (sub6 == "VmSize") {
-      string num = regex_replace(line, regex(R"([\D])"), "");
-      m_vmsize.Set(stoul(num.c_str()) * 1024);
+  while (proc_status.good()) {
+    getline(proc_status, line);
+    if (!line.rfind("VmRSS")) {
+      m_vm_rss.Set(stoul(regex_replace(line, regex(R"([\D])"), "").c_str()) * 1024);
+    } else if (!line.rfind("VmSize")) {
+      m_vm_size.Set(stoul(regex_replace(line, regex(R"([\D])"), "").c_str()) * 1024);
+    } else if (!line.rfind("VmPeak")) {
+      m_vm_peak.Set(stoul(regex_replace(line, regex(R"([\D])"), "").c_str()) * 1024);
     }
   }
 }

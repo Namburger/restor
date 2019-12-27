@@ -16,8 +16,9 @@ public:
 
 private:
   prometheus::Gauge& m_fds;
-  prometheus::Gauge& m_vmrss;
-  prometheus::Gauge& m_vmsize;
+  prometheus::Gauge& m_vm_rss;
+  prometheus::Gauge& m_vm_size;
+  prometheus::Gauge& m_vm_peak;
 };
 
 }  // namespace restor
