@@ -1,16 +1,17 @@
 #include <httplib/httplib.h>
 #include <sys/stat.h>
 
+#include <cxxopts/cxxopts.hpp>
 #include <fstream>
 #include <iostream>
+#include <locale>
 #include <nlohmann/json.hpp>
 #include <string>
 
-void get_server_info(httplib::Client& client, const std::string& host,
-                     const int port) {
-  std::cout << "\n----------------------------------------------------\n";
-  std::cout << "Sending GET to " << host << ":" << port << "/version\n";
-  auto res = client.Get("/version");
+void send_get(
+    httplib::Client& client, const std::string& host, const int port, const std::string& endpoint) {
+  std::cout << "Sending GET to " << host << ":" << port << endpoint << "\n";
+  auto res = client.Get(endpoint.c_str());
   if (res && (res->status == 200)) {
     std::cout << nlohmann::json::parse(res->body).dump(2) << "\n";
   } else {
@@ -23,10 +24,9 @@ void get_server_info(httplib::Client& client, const std::string& host,
   }
 }
 
-void post_image(httplib::Client& client, const std::string& image,
-                const std::string& host, const int port) {
-  std::unique_ptr<FILE, decltype(&std::fclose)> file(
-      std::fopen(image.c_str(), "rb"), std::fclose);
+void post_image(
+    httplib::Client& client, const std::string& image, const std::string& host, const int port) {
+  std::unique_ptr<FILE, decltype(&std::fclose)> file(std::fopen(image.c_str(), "rb"), std::fclose);
   struct stat stat;
   fstat(fileno(file.get()), &stat);
   if (!stat.st_size) {
@@ -36,8 +36,7 @@ void post_image(httplib::Client& client, const std::string& image,
 
   std::string content;
   content.resize(stat.st_size);
-  int64_t read =
-      std::fread(&content[0], sizeof(char), stat.st_size, file.get());
+  int64_t read = std::fread(&content[0], sizeof(char), stat.st_size, file.get());
   if (read != stat.st_size) {
     std::cout << "Cannot read image: " << image << "\n";
     std::abort();
@@ -46,9 +45,8 @@ void post_image(httplib::Client& client, const std::string& image,
   auto encoded = httplib::detail::base64_encode(content);
   nlohmann::json j = {{"data", encoded}};
 
-  std::cout << "\n----------------------------------------------------\n";
-  std::cout << "Sending POST @data={\"data\": base64_encode(" << image << ")} to "
-            << host << ":" << port << "/detects\n";
+  std::cout << "Sending POST @data={\"data\": base64_encode(" << image << ")} to " << host << ":"
+            << port << "/detects\n";
   auto res = client.Post("/detects", j.dump(), "application/json");
   if (res && (res->status == 200)) {
     std::cout << nlohmann::json::parse(res->body).dump(2) << "\n";
@@ -63,26 +61,51 @@ void post_image(httplib::Client& client, const std::string& image,
 }
 
 int main(int argc, char* argv[]) {
-  if (argc != 4) {
-    std::cout << "Usage: " << argv[0] << " <host> "
-              << " <port> "
-              << " <image_path>\n";
-    std::cout << "Please supply all arguments\n";
+  cxxopts::Options options(argv[0], "restor's example client");
+  // clang-format off
+  options.add_options()
+      ("h,host", "HostIP", cxxopts::value<std::string>())
+      ("p,port", "Port", cxxopts::value<int>())
+      ("m,method", "Method", cxxopts::value<std::string>())
+      ("e,endpoint", "Endpoint", cxxopts::value<std::string>())
+      ("i,image", "Path to image", cxxopts::value<std::string>());
+  // clang-format on
+
+  auto result = options.parse(argc, argv);
+
+  if (!result.count("host") || !result.count("port")) {
+    std::cout << options.help({"", "Group"}) << std::endl;
+    std::cout << "\nPlease provide server's ip and port\n";
     exit(1);
   }
 
-  const std::string host(argv[1]);
-  // const std::string host = "192.168.100.2";
-  const int port = atoi(argv[2]);
-  // const int port = 8888;
-  const std::string image(argv[3]);
-  // const std::string image = "cat.bmp";
+  const std::string& host(result["host"].as<std::string>());
+  const int port = result["port"].as<int>();
+
   httplib::Client client(host, port);
 
-  // GET /info
-  get_server_info(client, host, port);
-  // POST /detects
-  post_image(client, image, host, port);
+  if (!result.count("method") || !result.count("endpoint")) {
+    std::cout << "No method or end point provided, sending GET /version by default\n";
+    send_get(client, host, port, "/version");
+    exit(1);
+  }
+
+  std::string method(result["method"].as<std::string>());
+  std::transform(method.begin(), method.end(), method.begin(), ::toupper);
+
+  if (method == "GET") {
+    send_get(client, host, port, result["endpoint"].as<std::string>());
+  } else if (method == "POST") {
+    if (!result.count("image")) {
+      std::cout << "Please specify an image to send\n";
+      exit(1);
+    }
+    if (result["endpoint"].as<std::string>() != "/detects") {
+      std::cout << "POST must be sent to /detects\n";
+      exit(1);
+    }
+    post_image(client, result["image"].as<std::string>(), host, port);
+  }
 
   return 0;
 }

@@ -82,7 +82,8 @@ include  install_dependencies.sh  main.cc  Makefile  restor_client
 ```
 
 Then you can send any .bmp image to the server for object detection with this client by providing the ip and port of the server and the image you want it to detect:
-Take `grace_hopper.bmp` as an example:
+
+* Take `grace_hopper.bmp` as an example POST request:
 
  <img width="200"
      src="https://github.com/Namburger/restor/blob/master/test_data/grace_hopper.bmp" />
@@ -90,18 +91,10 @@ Take `grace_hopper.bmp` as an example:
 
 
 ```
-$ ./restor_client 127.0.0.1 8888 ../test_data/grace_hopper.bmp
-----------------------------------------------------
-Sending GET to 127.0.0.1:8888/version
+$ ./restor_client --host localhost --port 8888 --method post --endpoint /detects --image ../test_data/grace_hopper.bmp
+Sending POST @data={"data": base64_encode(../test_data/grace_hopper.bmp)} to localhost:8888/detects
 {
-  "edgetpu": "RuntimeVersion(12)",
-  "req_id": 167
-}
-
-----------------------------------------------------
-Sending POST @data={"data": base64_encode(../test_data/grace_hopper.bmp)} to 127.0.0.1:8888/detects
-{
-  "req_id": 168,
+  "req_id": 1020,
   "result1": {
     "candidate": "person",
     "score": 0.83984375
@@ -114,6 +107,17 @@ Sending POST @data={"data": base64_encode(../test_data/grace_hopper.bmp)} to 127
     "candidate": "tie",
     "score": 0.2109375
   }
+}
+```
+
+* Here is an example GET request:
+
+```
+$ ./restor_client --host localhost --port 8888 --method get --endpoint /version
+Sending GET to localhost:8888/version
+{
+  "edgetpu": "RuntimeVersion(12)",
+  "req_id": 1022
 }
 ```
 
