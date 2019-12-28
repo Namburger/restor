@@ -66,17 +66,41 @@ I1223 22:54:56.403978 22708 server.cc:42] Serving on port: 8888
 
 You can change the config/restor.yaml to configure your model, ports, etc...
 
-* One liner example to send a POST to the server as a client:
+* I have written a very simple example client in the `example_client` directory.
+This client will send a GET /version and a POST /detects to the server.
 
-<img width="200"
+To build:
+
+```
+$ cd example_client
+$ make install
+...
+$ make
+g++ -Iinclude -std=c++17 -Wall -Wextra -pthread -o restor_client main.cc
+$ ls
+include  install_dependencies.sh  main.cc  Makefile  restor_client
+```
+
+Then you can send any .bmp image to the server for object detection with this client by providing the ip and port of the server and the image you want it to detect:
+Take `grace_hopper.bmp` as an example:
+
+ <img width="200"
      src="https://github.com/Namburger/restor/blob/master/test_data/grace_hopper.bmp" />
 <br><b>Figure 1.</b> grace_hopper.bmp
 
+
 ```
-$ echo "{\"data\":\"`cat test_data/grace_hopper.bmp|base64 -w0`\"}" > /tmp/grace.json && curl -d@/tmp/grace.json -H "Content-Type: application/json" -X POST http://localhost:9090/detects | jq
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100 1224k  100   161  100 1224k   2555  18.9M --:--:-- --:--:-- --:--:-- 18.9M
+$ ./restor_client localhost 8888 ../test_data/grace_hopper.bmp 
+
+----------------------------------------------------
+Sending GET /version to localhost:8888
+{
+  "edgetpu": "RuntimeVersion(12)",
+  "req_id": 1
+}
+
+----------------------------------------------------
+Sending POST /detects @data=base64_encode(../test_data/grace_hopper.bmp) to localhost:8888
 {
   "req_id": 2,
   "result1": {
@@ -92,21 +116,6 @@ $ echo "{\"data\":\"`cat test_data/grace_hopper.bmp|base64 -w0`\"}" > /tmp/grace
     "score": 0.2109375
   }
 }
-
-```
-
-I also use [jq](https://stedolan.github.io/jq/) to make the json string prettier, optionally you can just run the above command without `| jq` at the end if you don't have it installed.
-
-Explaination of the one liner:
-```
-$ # create the JSON file with BMP encoded data
-$ echo "{\"data\":\"`cat test_data/grace_hopper.bmp|base64 -w0`\"}" > /tmp/grace.json
-$ # if no error, submit that JSON file
-$ curl -d@/tmp/grace.json \
-  -H "Content-Type: application/json" \
-  -X POST \
-  http://localhost:9090/detects | 
-jq
 ```
 
 ## Metrics
