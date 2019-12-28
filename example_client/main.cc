@@ -9,7 +9,7 @@
 void get_server_info(httplib::Client& client, const std::string& host,
                      const int port) {
   std::cout << "\n----------------------------------------------------\n";
-  std::cout << "Sending GET /version to " << host << ":" << port << "\n";
+  std::cout << "Sending GET to " << host << ":" << port << "/version\n";
   auto res = client.Get("/version");
   if (res && (res->status == 200)) {
     std::cout << nlohmann::json::parse(res->body).dump(2) << "\n";
@@ -47,8 +47,8 @@ void post_image(httplib::Client& client, const std::string& image,
   nlohmann::json j = {{"data", encoded}};
 
   std::cout << "\n----------------------------------------------------\n";
-  std::cout << "Sending POST /detects @data=base64_encode(" << image << ") to "
-            << host << ":" << port << "\n";
+  std::cout << "Sending POST @data={\"data\": base64_encode(" << image << ")} to "
+            << host << ":" << port << "/detects\n";
   auto res = client.Post("/detects", j.dump(), "application/json");
   if (res && (res->status == 200)) {
     std::cout << nlohmann::json::parse(res->body).dump(2) << "\n";

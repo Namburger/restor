@@ -7,12 +7,12 @@ Please check the Notes section for some limitations as this project is still on 
 
 
 ## API Endpoints
-| Method  | Endpoint  | Function                               | Requires                  |
-|:--------|:---------:|:--------------------------------------:|--------------------------:|
-| POST    | /detects  | Does Object Detection                  | json data of a .bmp image |
-| GET     | /version  | Exposes EdgeTPU Runtime Version        | None                      |
-| GET     | /info     | Exposes server's current configuration | None                      |
-| GET     | /metrics  | Exposes prometheus metrics             | None                      |
+| Method  | Endpoint  | Function                               | Requires                              |
+|:--------|:---------:|:--------------------------------------:|--------------------------------------:|
+| POST    | /detects  | Does Object Detection                  | json string: {"data": base64(img.bmp)}|
+| GET     | /version  | Exposes EdgeTPU Runtime Version        | None                                  |
+| GET     | /info     | Exposes server's current configuration | None                                  |
+| GET     | /metrics  | Exposes prometheus metrics             | None                                  |
 
 ## Requirements
 
@@ -90,19 +90,18 @@ Take `grace_hopper.bmp` as an example:
 
 
 ```
-$ ./restor_client localhost 8888 ../test_data/grace_hopper.bmp 
-
+$ ./restor_client 127.0.0.1 8888 ../test_data/grace_hopper.bmp
 ----------------------------------------------------
-Sending GET /version to localhost:8888
+Sending GET to 127.0.0.1:8888/version
 {
   "edgetpu": "RuntimeVersion(12)",
-  "req_id": 1
+  "req_id": 167
 }
 
 ----------------------------------------------------
-Sending POST /detects @data=base64_encode(../test_data/grace_hopper.bmp) to localhost:8888
+Sending POST @data={"data": base64_encode(../test_data/grace_hopper.bmp)} to 127.0.0.1:8888/detects
 {
-  "req_id": 2,
+  "req_id": 168,
   "result1": {
     "candidate": "person",
     "score": 0.83984375
@@ -120,7 +119,28 @@ Sending POST /detects @data=base64_encode(../test_data/grace_hopper.bmp) to loca
 
 ## Metrics
 
-If you are interested in server metrics, they are available at the /metrics endpoint.
+If you are interested in server metrics, they are available at the GET /metrics endpoint:
+```
+$ curl localhost:8888/metrics
+# HELP server_request_total Number of total http requests handled
+# TYPE server_request_total counter
+server_request_total{endpoint="metrics",method="GET"} 63.000000
+server_request_total{endpoint="version",method="GET"} 84.000000
+server_request_total{endpoint="detects",method="POST"} 84.000000
+# HELP process_open_fds Number of open file descriptors
+# TYPE process_open_fds gauge
+process_open_fds 18.000000
+# HELP process_resident_memory_bytes Process resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 441085952.000000
+# HELP process_virtual_memory_bytes Process virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 704843776.000000
+# HELP process_virtual_memory_max_bytes Process peak virtual memory size in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes 911925248.000000
+
+```
 
 An example prometheus.yaml config is provided in the config directory. You can easily setup a docker container by creating a Dockerfile with this content (also provided in the config directory):
 ```
