@@ -8,6 +8,9 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
+namespace restor_client {
+
+// Send a GET request to host:port/endpoint
 void send_get(
     httplib::Client& client, const std::string& host, const int port, const std::string& endpoint) {
   std::cout << "Sending GET to " << host << ":" << port << endpoint << "\n";
@@ -24,8 +27,18 @@ void send_get(
   }
 }
 
-void post_image(
-    httplib::Client& client, const std::string& image, const std::string& host, const int port) {
+// check if val ends with end
+bool ends_with(const std::string& val, const std::string& end) {
+  if (val.size() < end.size()) return false;
+  return std::equal(end.rbegin(), end.rend(), val.rbegin());
+}
+
+// Takes an image.bmp and encoded to base64 since json doesn't support raw data
+const std::string base64_encoded_bmp(const std::string& image) {
+  if (!ends_with(image, ".bmp")) {
+    std::cout << "Error: imagge must be in .bmp format\n";
+    std::abort();
+  }
   std::unique_ptr<FILE, decltype(&std::fclose)> file(std::fopen(image.c_str(), "rb"), std::fclose);
   struct stat stat;
   fstat(fileno(file.get()), &stat);
@@ -42,8 +55,13 @@ void post_image(
     std::abort();
   }
 
-  auto encoded = httplib::detail::base64_encode(content);
-  nlohmann::json j = {{"data", encoded}};
+  return httplib::detail::base64_encode(content);
+}
+
+// send a POST request to host:port/detects
+void post_image(
+    httplib::Client& client, const std::string& image, const std::string& host, const int port) {
+  nlohmann::json j = {{"data", base64_encoded_bmp(image)}};
 
   std::cout << "Sending POST @data={\"data\": base64_encode(" << image << ")} to " << host << ":"
             << port << "/detects\n";
@@ -59,6 +77,25 @@ void post_image(
     }
   }
 }
+
+// send a GET request to host:port/metrics
+void get_metrics(httplib::Client& client, const std::string& host, const int port) {
+  std::cout << "Sending GET to " << host << ":" << port << "/metrics"
+            << "\n";
+  auto res = client.Get("/metrics");
+  if (res && (res->status == 200)) {
+    std::cout << res->body << "\n";
+  } else {
+    if (res->status) {
+      std::cout << "\nError: " << res->status << "\n";
+    } else {
+      std::cout << "\nError: No reponse from server"
+                << "\n";
+    }
+  }
+}
+
+}  // namespace restor_client
 
 int main(int argc, char* argv[]) {
   cxxopts::Options options(argv[0], "restor's example client");
@@ -79,32 +116,36 @@ int main(int argc, char* argv[]) {
     exit(1);
   }
 
-  const std::string& host(result["host"].as<std::string>());
-  const int port = result["port"].as<int>();
+  const auto& host(result["host"].as<std::string>());
+  const auto port = result["port"].as<int>();
 
   httplib::Client client(host, port);
 
   if (!result.count("method") || !result.count("endpoint")) {
     std::cout << "No method or end point provided, sending GET /version by default\n";
-    send_get(client, host, port, "/version");
+    restor_client::send_get(client, host, port, "/version");
     exit(1);
   }
 
   std::string method(result["method"].as<std::string>());
   std::transform(method.begin(), method.end(), method.begin(), ::toupper);
+  const auto& endpoint = result["endpoint"].as<std::string>();
 
   if (method == "GET") {
-    send_get(client, host, port, result["endpoint"].as<std::string>());
+    if (endpoint == "/metrics")
+      restor_client::get_metrics(client, host, port);
+    else
+      restor_client::send_get(client, host, port, endpoint);
   } else if (method == "POST") {
     if (!result.count("image")) {
       std::cout << "Please specify an image to send\n";
       exit(1);
     }
-    if (result["endpoint"].as<std::string>() != "/detects") {
+    if (endpoint != "/detects") {
       std::cout << "POST must be sent to /detects\n";
       exit(1);
     }
-    post_image(client, result["image"].as<std::string>(), host, port);
+    restor_client::post_image(client, result["image"].as<std::string>(), host, port);
   }
 
   return 0;
