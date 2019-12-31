@@ -45,11 +45,11 @@ Default build will be for k8.
 
 Find the output binary file inside the out directory.
 
-## Example run (please run these examples from root dir)
+## Example run
 
 After installing all third party libraries and finish building the binaries, don't forget to install [libedgetpu package](https://coral.ai/software/#debian-packages). Then:
 
-* Running the server is as easy as:
+* Running the server is as easy as (run from project root dir):
 
 ```
 $ ./out/k8/restor
@@ -66,9 +66,11 @@ I1223 22:54:56.403978 22708 server.cc:42] Serving on port: 8888
 
 You can change the config/restor.yaml to configure your model, ports, etc...
 
-* I have written a very simple example client in the `example_client` directory.
-This client will send a GET /version and a POST /detects to the server.
+* I have written 2 very simple example clients in the `example_client` directory.
 
+1) A simple C++ CLI Client that allows you to send a POST images or access all available GET endpoints of the restor server.
+
+This example is placed in `example_client/cpp_cli_client`.
 To build:
 
 ```
@@ -120,6 +122,18 @@ Sending GET to localhost:8888/version
   "req_id": 1022
 }
 ```
+
+2) A python client that takes an image with the cv library and send it to restor.
+
+This example is placed in `example_client/cv_client`.
+```
+$ python3 cv_client.py --host localhost --port 8888
+```
+
+ <img width="500"
+     src="https://github.com/Namburger/restor/blob/master/test_data/banana.png" />
+<br><b>Figure 1.</b> grace_hopper.bmp
+
 
 ## Metrics
 
