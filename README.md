@@ -132,7 +132,7 @@ $ python3 cv_client.py --host localhost --port 8888
 
  <img width="500"
      src="https://github.com/Namburger/restor/blob/master/test_data/banana.png" />
-<br><b>Figure 1.</b> grace_hopper.bmp
+<br><b>Figure 2.</b> banana.png
 
 
 ## Metrics

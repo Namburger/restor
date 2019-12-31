@@ -31,7 +31,7 @@ def take_image(file):
 
 # send the post request
 def send_request(URL, payload):
-    print('Sending @data={\"data\": base64_encode(captured.bmp) to', URL)
+    print('Sending @data={\"data\": base64_encode(captured.bmp)} to', URL)
     resp = requests.post(url=URL, data=payload, headers={
         'content-type': 'application/json'})
     j = json.loads(resp.text)
