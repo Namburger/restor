@@ -1,10 +1,15 @@
 # Restor
 
-Restor is a punny REST API for Object Detection but this is not a good name because I might add classification functionality later.
-Machine Learning Inference for Object Detection on the Google's EdgeTPU Platform.
+Restor is a punny REST API for Object Detection.
 You can send it non-garbage base64 encoded .bmp images, it can guess what objects are in that image and send you back a result as a json string.
-Please check the Notes section for some limitations as this project is still on it's early stage.
 
+Check out my [Medium](https://medium.com/@namvu1291/build-your-own-budget-ai-cloud-with-googles-coral-edgetpu-technology-66854340ecd3) article to see what you can do with this project:
+<img width="200"
+     src="https://github.com/Namburger/restor/blob/master/test_data/medium.png" />
+<br><b>Figure 1.</b>The AI Cloud
+
+
+Please check the Notes section for some limitations as this project is still on it's early stage.
 
 ## API Endpoints
 | Method  | Endpoint  | Function                               | Requires                              |
@@ -89,7 +94,7 @@ Then you can send any .bmp image to the server for object detection with this cl
 
  <img width="200"
      src="https://github.com/Namburger/restor/blob/master/test_data/grace_hopper.bmp" />
-<br><b>Figure 1.</b> grace_hopper.bmp
+<br><b>Figure 2.</b> grace_hopper.bmp
 
 
 ```
@@ -132,7 +137,7 @@ $ python3 cv_client.py --host localhost --port 8888
 
  <img width="500"
      src="https://github.com/Namburger/restor/blob/master/test_data/banana.png" />
-<br><b>Figure 2.</b> banana.png
+<br><b>Figure 3.</b> banana.png
 
 
 ## Metrics
@@ -176,7 +181,7 @@ You will then be able to query metrics by visiting localhost:9090/graph on your 
 
 <img width="777"
      src="https://github.com/Namburger/restor/blob/master/test_data/metrics.png" />
-<br><b>Figure 2.</b> metrics.png
+<br><b>Figure 4.</b> metrics.png
 
 ## Notes
 
