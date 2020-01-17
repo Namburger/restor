@@ -82,8 +82,8 @@ prometheus_cpp_repositories()
 
 new_local_repository(
     name = "libedgetpu",
-    path = "libedgetpu",
-    build_file = "libedgetpu/BUILD"
+    path = "thirdparty/libedgetpu",
+    build_file = "thirdparty/libedgetpu/BUILD"
 )
 
 http_archive(
