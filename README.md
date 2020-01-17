@@ -4,10 +4,9 @@ Restor is a punny REST API for Object Detection.
 You can send it non-garbage base64 encoded .bmp images, it can guess what objects are in that image and send you back a result as a json string.
 
 Check out my [Medium](https://medium.com/@namvu1291/build-your-own-budget-ai-cloud-with-googles-coral-edgetpu-technology-66854340ecd3) article to see what you can do with this project:
-<img width="200"
-     src="https://github.com/Namburger/restor/blob/master/test_data/medium.png" />
-<br><b>Figure 1.</b>The AI Cloud
 
+[<img dth="777" src="https://github.com/Namburger/restor/blob/master/test_data/medium.png">](https://medium.com/@namvu1291/build-your-own-budget-ai-cloud-with-googles-coral-edgetpu-technology-66854340ecd3)
+<br><b>Figure 1.</b>The AI Cloud
 
 Please check the Notes section for some limitations as this project is still on it's early stage.
 
