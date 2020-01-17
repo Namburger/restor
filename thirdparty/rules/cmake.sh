@@ -2,7 +2,7 @@
 # set -x
 
 script_dir=$(dirname "$(readlink -f "$0")")
-out_dir="$script_dir"/../all/cmake
+out_dir="$script_dir"/../install/cmake
 if [ -d "$out_dir" ]
   then
     echo "cmake installed"

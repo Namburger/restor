@@ -2,7 +2,7 @@
 # set -x
 
 script_dir=$(dirname "$(readlink -f "$0")")
-out_dir="$script_dir"/../all/nlohmann
+out_dir="$script_dir"/../install/nlohmann
 if [ -d "$out_dir" ]
   then
     echo "json installed"

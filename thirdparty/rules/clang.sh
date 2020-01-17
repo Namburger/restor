@@ -2,7 +2,7 @@
 # set -x
 
 script_dir=$(dirname "$(readlink -f "$0")")
-out_dir="$script_dir"/../all/clang
+out_dir="$script_dir"/../install/clang
 if [ -d "$out_dir" ]
   then
     echo "clang already installed"

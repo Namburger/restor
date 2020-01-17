@@ -2,7 +2,7 @@
 # set -x
 
 script_dir=$(dirname "$(readlink -f "$0")")
-out_dir="$script_dir"/../all/bazel
+out_dir="$script_dir"/../install/bazel
 if [ -d "$out_dir" ]
   then
     echo "bazel already installed"

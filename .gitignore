@@ -2,3 +2,4 @@
 out
 bazel-*
 thirdparty/a*
+thirdparty/install*

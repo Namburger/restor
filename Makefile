@@ -16,11 +16,11 @@
 SHELL := /bin/bash
 MAKEFILE_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 SRC_DIR := $(MAKEFILE_DIR)/src
-BAZEL := $(MAKEFILE_DIR)/thirdparty/all/bazel/bazel
+BAZEL := $(MAKEFILE_DIR)/thirdparty/install/bazel/bazel
 
 SRCS := $(shell find $(SRC_DIR) -name *.cc -or -name *.h)
 $(info Formatting [${SRCS}])
-$(shell thirdparty/all/clang/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/clang-format -i $(SRCS))
+$(shell thirdparty/install/clang/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/clang-format -i $(SRCS))
 
 # Allowed CPU values: k8, armv7a, aarch64
 CPU ?= k8

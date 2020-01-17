@@ -2,7 +2,7 @@
 # set -x
 
 script_dir=$(dirname "$(readlink -f "$0")")
-out_dir="$script_dir"/../all/base64
+out_dir="$script_dir"/../install/base64
 if [ -d "$out_dir" ]
   then
     echo "base64 installed"
