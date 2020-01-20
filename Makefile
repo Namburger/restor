@@ -34,7 +34,7 @@ BAZEL_BUILD_FLAGS := --crosstool_top=@crosstool//:toolchains \
                      --compiler=gcc \
                      --cpu=$(CPU) \
                      --sandbox_debug \
-                     --linkopt=-L$(MAKEFILE_DIR)/libedgetpu/direct/$(CPU) \
+                     --linkopt=-L$(MAKEFILE_DIR)/thirdparty/libedgetpu/direct/$(CPU) \
                      --linkopt=-l:libedgetpu.so.1 \
                      --copt=-std=c++17
 
