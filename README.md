@@ -56,8 +56,7 @@ After installing all third party libraries and finish building the binaries, don
 * Running the server is as easy as (run from project root dir):
 
 ```
-// Notice: We'll have to link against this for now since the new runtime broke it :(
-$ LD_LIBRARY_PATH=thirdparty/libedgetpu/direct/k8 ./out/k8/restor
+$ ./out/k8/restor
 I1223 22:54:52.376971 22708 main.cc:28] RESTOR
 I1223 22:54:52.390523 22708 main.cc:35] found 1 TPU(s)
 I1223 22:54:52.390568 22708 main.cc:37] config: config/restor.yaml
