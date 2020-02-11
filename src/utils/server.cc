@@ -106,9 +106,11 @@ void DetectionServer::handle_detection(response& res, const request& req) {
 
   for (auto i = 0; i < num_to_return; i++) {
     const auto& result = results.at(i);
-    j["result" + to_string(i + 1)] = {{"candidate", m_labels[result.label]},
-                                      {"score", result.score}};
-    // j["corner"] = result.corners.DebugString();
+    j["result" + to_string(i + 1)] = {
+        {"candidate", m_labels[result.label]}, {"score", result.score},
+        {"xmin", result.corners.xmin},         {"xmax", result.corners.xmax},
+        {"ymin", result.corners.ymin},         {"ymax", result.corners.ymax},
+    };
   }
 
   LOG(INFO) << j.dump();
