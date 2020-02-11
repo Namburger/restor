@@ -24,8 +24,6 @@ def main():
     URL = 'http://' + args.host + ':' + args.port + '/detects'
     tmp_file = '/tmp/captured.bmp'
     frame = cv2.VideoCapture(0)
-    frame.set(cv2.CAP_PROP_FRAME_WIDTH, 300)
-    frame.set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
     frame.set(cv2.CAP_PROP_FPS, 30)
     frame_num = 0
     while True:
@@ -38,17 +36,7 @@ def main():
             data = base64.b64encode(image.read()).decode('utf-8')
             payload = json.dumps({'data': data})
         j = send_request(URL, payload)
-        for i in range(1,4):
-            key = 'result' + str(i)
-            candidate = j[key]['candidate']
-            score = j[key]['score']
-            start = (int(j[key]['xmin']*300), int(j[key]['ymin']*300))
-            end = (int(j[key]['xmax']*300), int(j[key]['ymax']*300))
-            print("candidate", candidate)
-            print("score", score)
-            print("start", start)
-            print("end", end)
-            img = cv2.rectangle(img, start, end, (255, 0, 0), 2)
+        print(json.dumps(j))
         cv2.imshow('Restor CV Client Demo', img)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
