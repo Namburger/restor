@@ -3,3 +3,4 @@ out
 bazel-*
 thirdparty/a*
 thirdparty/install*
+build_package.sh
